@@ -1,0 +1,135 @@
+#!/bin/bash -e
+
+###########################################
+#  Easy project configuration utility     #
+# Copyright (c) 2016 Hlabber corporation  #
+###########################################
+
+function show_help()
+{
+    echo "Usage:"
+    echo ""
+    echo "./configure [options]"
+    echo ""
+    echo "Options:"
+    echo "  --help                     shows this message"
+    echo "  --debug                    configures compilation for debug (default)"
+    echo "  --release                  configures compilation for release"
+    echo "  --release-with-debuginfo   configures compilation for release with debug symbols"
+    echo "  --release-min-size         configures compilation for release that"
+    echo "                             produces minimal size of target binary"
+    echo ""
+}
+
+USER_OPTION=$1
+CMAKE_OPTION=
+
+if [ "x$USER_OPTION" != "x" ] ; then
+
+    #
+    # Check option.
+    #
+
+    if   [ "x$USER_OPTION" = "x--help" ] ; then
+        show_help
+        exit 0
+    elif [ "x$USER_OPTION" = "x--debug" ] ; then
+        CMAKE_OPTION="-DCMAKE_BUILD_TYPE:STRING=Debug"
+    elif [ "x$USER_OPTION" = "x--release" ] ; then
+        CMAKE_OPTION="-DCMAKE_BUILD_TYPE:STRING=Release"
+    elif [ "x$USER_OPTION" = "x--release-with-debuginfo" ] ; then
+        CMAKE_OPTION="-DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo"
+    elif [ "x$USER_OPTION" = "x--release-min-size" ] ; then
+        CMAKE_OPTION="-DCMAKE_BUILD_TYPE:STRING=MinSizeRel"
+    else
+        echo "Unrecognized option '$USER_OPTION'. Use option --help for info about available options"
+        exit 1
+    fi
+fi
+
+#
+# Check if directory is OK.
+#
+
+SCRIPT_DIRECTORY=`dirname $0`
+CURRENT_DIRECTORY=`pwd -P`
+pushd $SCRIPT_DIRECTORY > /dev/null
+EXPANDED_SCRIPT_DIR=`pwd -P`
+popd > /dev/null
+if [ "x$EXPANDED_SCRIPT_DIR" != "x$CURRENT_DIRECTORY" ] ; then
+    echo "Please enter to the directory $EXPANDED_SCRIPT_DIR and then run configure."
+    echo ""
+    exit 1
+fi
+
+#
+# Check if configuration is already done
+#
+
+if [ -f reconfig.status ] ; then
+    echo "Configururation already done."
+    echo "to reconfigure, run 'make clean' first and start configure again."
+    echo ""
+    exit 0
+fi
+
+#
+# Start configuration.
+#
+
+cmake --version > /dev/null || D=$?
+if [ "x$D" = "x127" ] ; then
+    REQUIRED_CMAKE_VERSION=`grep -w cmake_minimum_required CMakeLists.txt | head -n 1 | awk -F'[() ]' '{ print $3; }'`
+    echo "You have to install CMake or ${REQUIRED_CMAKE_VERSION} higher"
+    echo ""
+    exit 1
+elif [ "x$D" != "x" ] ; then
+    echo "Please check if CMake is installed correctly."
+    echo ""
+    exit 1
+fi
+
+cmake . $CMAKE_OPTION
+
+if [ -f Makefile ] ; then
+    #
+    # Additional cleanup commands
+    #
+
+    PROJECT_NAME=`grep -w project CMakeLists.txt | head -n 1 | awk -F'(' '{print $2;}' | awk -F')' '{ print $1;}'`
+    LN_NUM=`grep -nw "clean:" Makefile | awk -F':' '{ print $1; }'`
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf reconfig.status"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf ${PROJECT_NAME}-config.h"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf CMakeFiles"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf CMakeCache.txt"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf cmake_install.cmake"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\trm -rf Makefile"
+    sed -i "${LN_NUM}a $CMD" Makefile
+    LN_NUM=$((LN_NUM+1))
+    CMD="\\\n"
+    sed -i "${LN_NUM}a $CMD" Makefile
+
+    touch reconfig.status
+
+    echo "** DONE ***"
+    echo ""
+    echo "Now run 'make'."
+    echo ""
+else
+    echo "*** Configuration failed."
+    echo ""
+    exit 1
+fi
+
+exit 0
