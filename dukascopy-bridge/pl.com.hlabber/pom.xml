@@ -31,7 +31,7 @@
              ***  Find the latest available version here:
              ***  http://www.dukascopy.com/client/jforexlib/publicrepo/com/dukascopy/dds2/DDS2-jClient-JForex/
              -->
-            <version>3.4.13</version>
+            <version>3.6.19</version>
         </dependency>
 
         <dependency>
@@ -41,7 +41,7 @@
              ***  Find the latest available version here:
              ***  http://www.dukascopy.com/client/jforexlib/publicrepo/com/dukascopy/api/JForex-API/
              -->
-            <version>2.13.62</version>
+            <version>2.13.90</version>
             <classifier>sources</classifier>
         </dependency>
 

@@ -2,7 +2,7 @@
 **                                                                    **
 **             -=≡≣ High Frequency Trading System  ≣≡=-              **
 **                                                                    **
-**          Copyright  2017 - 2019 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **
