@@ -1,8 +1,7 @@
 3rd_party/boost
 3rd_party/boost_*
-dukascopy
+dukascopy-bridge/export/*
 dukascopy-bridge/pl.com.hlabber/target
-hft/logs
 hft/hft-config.h
 hft/CMakeCache.txt
 hft/cmake_install.cmake

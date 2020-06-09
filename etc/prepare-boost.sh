@@ -8,9 +8,9 @@ pushd $PROJECT_TREE_DIRECTORY > /dev/null
 # Check if we have boost.
 #
 
-BOOST_DIRECTORY="3rd_party/boost_1_66_0"
-BOOST_TARBALL=boost_1_66_0.tar.bz2
-BOOST_URL="https://dl.bintray.com/boostorg/release/1.66.0/source/$BOOST_TARBALL"
+BOOST_DIRECTORY="3rd_party/boost_1_73_0"
+BOOST_TARBALL=boost_1_73_0.tar.bz2
+BOOST_URL="https://jaist.dl.sourceforge.net/project/boost/boost/1.73.0/$BOOST_TARBALL"
 
 if [ -d $BOOST_DIRECTORY ] ; then
     echo "Boost libraries already downloaded into the project tree"
