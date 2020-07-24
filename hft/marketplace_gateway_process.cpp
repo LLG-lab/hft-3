@@ -68,6 +68,8 @@ marketplace_gateway_process::marketplace_gateway_process(boost::asio::io_context
             hft_log(INFO) << "Found bridge application: [" << start_program << ']';
         }
 
+        proc_item.process_stdin.reset(new boost::process::opstream());
+
         proc_item.child.reset(
             new boost::process::child(
                     boost::process::exe=start_program.c_str(),
@@ -94,7 +96,7 @@ marketplace_gateway_process::marketplace_gateway_process(boost::asio::io_context
             hft_log(INFO) << "Bridge process successfully started, " << ec;
         }
 
-        proc_item.process_stdin.reset(new boost::process::opstream());
+//        proc_item.process_stdin.reset(new boost::process::opstream());
         (*proc_item.process_stdin) << create_process_configuration() << std::endl;
         proc_item.process_stdin -> flush();
         proc_item.process_stdin -> pipe().close();

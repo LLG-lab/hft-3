@@ -34,7 +34,9 @@ import java.io.*;
 
 public class Main {
 
-    private static String jnlpUrl = "http://platform.dukascopy.com/demo/jforex.jnlp";
+    private static String jnlpUrl_demo = "http://platform.dukascopy.com/demo/jforex.jnlp";
+    private static String jnlpUrl_live = "http://platform.dukascopy.com/live_3/jforex_3.jnlp";
+    private static String jnlpUrl = "";
 
     private static String userName = "username";
     private static String password = "password";
@@ -99,6 +101,22 @@ public class Main {
 
             userName = config.getJSONObject("authorization").getString("username");
             password = config.getJSONObject("authorization").getString("password");
+
+            if (config.getJSONObject("mode").equals("live"))
+            {
+                System.out.println("Starting with mode LIVE");
+                jnlpUrl = jnlpUrl_live;
+            }
+            else if (config.getJSONObject("mode").equals("demo"))
+            {
+                System.out.println("Starting with mode DEMO");
+                jnlpUrl = jnlpUrl_demo;
+            }
+            else
+            {
+                System.err.println("Invalid mode " + config.getJSONObject("mode"));
+                System.exit(1);
+            }
         }
         catch (JSONException e)
         {
