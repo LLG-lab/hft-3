@@ -92,7 +92,7 @@ public class Main {
         }
 
         //
-        // Other settings is in json configuration file.
+        // Other settings are in json configuration file.
         //
 
         try
@@ -241,7 +241,7 @@ public class Main {
             System.out.println("Subscribing GBPUSD");
             instruments.add(Instrument.GBPUSD);
         }
-        
+
         if (config.has("NZDUSD"))
         {
             System.out.println("Subscribing NZDUSD");

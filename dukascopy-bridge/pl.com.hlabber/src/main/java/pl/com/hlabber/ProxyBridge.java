@@ -107,16 +107,16 @@ public class ProxyBridge implements IStrategy
         try
         {
             String instr = instrument2instrumentstr(instrument);
-
-            String model = config.getJSONObject(instr).getString("investition_policy_model");
+//userName = config.getJSONObject("authorization").getString("username");
+            String model = config.getJSONObject(instr).getJSONObject("investition_policy").getString("model");
 
             if (model.equals("const_units"))
             {
-                return (config.getJSONObject(instr).getDouble("amount")) / 1000.0;
+                return (config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("amount")) / 1000.0;
             }
             else if (model.equals("equity_percentage"))
             {
-                double funct = config.getJSONObject(instr).getDouble("function");
+                double funct = config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("function");
                 double ret = (funct * this.account.getEquity()) / 1000000.0;
 
                 return ((ret < 0.001) ?  0.001 : ret);
