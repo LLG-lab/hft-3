@@ -102,19 +102,19 @@ public class Main {
             userName = config.getJSONObject("authorization").getString("username");
             password = config.getJSONObject("authorization").getString("password");
 
-            if (config.getJSONObject("mode").equals("live"))
+            if (config.getString("mode").equals("live"))
             {
                 System.out.println("Starting with mode LIVE");
                 jnlpUrl = jnlpUrl_live;
             }
-            else if (config.getJSONObject("mode").equals("demo"))
+            else if (config.getString("mode").equals("demo"))
             {
                 System.out.println("Starting with mode DEMO");
                 jnlpUrl = jnlpUrl_demo;
             }
             else
             {
-                System.err.println("Invalid mode " + config.getJSONObject("mode"));
+                System.err.println("Invalid mode " + config.getString("mode"));
                 System.exit(1);
             }
         }
