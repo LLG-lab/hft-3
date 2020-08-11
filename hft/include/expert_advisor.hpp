@@ -69,7 +69,7 @@ public:
     void enable_cache(void);
     void trade_on_positive_swaps_only(bool flag) { trade_on_positive_swaps_only_ = flag; }
     void setup_hci(bool state) { if (decision_compensate_inverter_.use_count()) decision_compensate_inverter_enabled_ = state; }
-    const custom_handler_options &get_custom_handler_options(void) { return custom_handler_options_; }
+    const custom_handler_options &get_custom_handler_options(void) const { return custom_handler_options_; }
 
 private:
 
