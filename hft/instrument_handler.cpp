@@ -359,7 +359,7 @@ std::string instrument_handler::short_response(void) const
 {
     if (expert_advisor_.get_custom_handler_options().invert_engine_decision)
     {
-        hft_log(WARNING) << "Inverting decision to [LONG] on handler layer because of custom handler option ‘invert_engine_decision’"
+        hft_log(WARNING) << "Inverting decision to [LONG] on handler layer because of custom handler option ‘invert_engine_decision’";
 
         return std::string("LONG");
     }
@@ -371,7 +371,7 @@ std::string instrument_handler::long_response(void) const
 {
     if (expert_advisor_.get_custom_handler_options().invert_engine_decision)
     {
-        hft_log(WARNING) << "Inverting decision to [SHORT] on handler layer because of custom handler option ‘invert_engine_decision’"
+        hft_log(WARNING) << "Inverting decision to [SHORT] on handler layer because of custom handler option ‘invert_engine_decision’";
 
         return std::string("SHORT");
     }
