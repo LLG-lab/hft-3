@@ -339,6 +339,9 @@ void expert_advisor::factory_advisor(void)
       "position_control_policy" : {
           (attributes specified for particular PCP)
       },
+      "custom_handler_options" : {
+          "invert_engine_decision" : true
+      },
       "hysteresis_compensate_inverter" : {
            "capacity" : 7,
            "s_threshold" : 0.45,
@@ -616,6 +619,49 @@ void expert_advisor::factory_advisor(void)
 
         position_controller_.reset(new position_control_manager(dpips_limit_loss_, dpips_limit_profit_));
         position_controller_ -> configure_from_json(pcp_json);
+
+        //
+        // Custom handler options (not required).
+        //
+
+        /*      "custom_handler_options" : {
+          "invert_engine_decision" : true
+          },
+        */
+
+        cJSON *cho_json = cJSON_GetObjectItem(json, "custom_handler_options");
+
+        if (cho_json != nullptr)
+        {
+            cJSON *invert_engine_decision_json = cJSON_GetObjectItem(cho_json, "invert_engine_decision");
+
+            if (invert_engine_decision_json != nullptr)
+            {
+                if (invert_engine_decision_json -> type == cJSON_False)
+                {
+                    custom_handler_options_.invert_engine_decision = false;
+                }
+                else if (invert_engine_decision_json -> type == cJSON_True)
+                {
+                    custom_handler_options_.invert_engine_decision = true;
+                }
+                else if (invert_engine_decision_json -> type == cJSON_Number)
+                {
+                    custom_handler_options_.invert_engine_decision = (invert_engine_decision_json -> valueint == 0) ? false : true;
+                }
+                else
+                {
+                    std::string err_msg = std::string("Illegal type of „invert_engine_decision” attribute")
+                                  + file_name;
+
+                    throw exception(err_msg);
+                }
+
+                hft_log(INFO) << "Attribute [custom_handler_options.invert_engine_decision] setup for value ["
+                              << (custom_handler_options_.invert_engine_decision ? "true" : "false") << "]";
+
+            }
+        }
 
         //
         // HCI informations (optional).

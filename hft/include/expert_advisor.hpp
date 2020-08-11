@@ -32,6 +32,15 @@ public:
 
     DEFINE_CUSTOM_EXCEPTION_CLASS(exception, std::runtime_error)
 
+    typedef struct _custom_handler_options
+    {
+        _custom_handler_options(void)
+            : invert_engine_decision(false) {}
+
+        bool invert_engine_decision;
+
+    } custom_handler_options;
+
     expert_advisor(const std::string &instrument);
     expert_advisor(void) = delete;
     ~expert_advisor(void);
@@ -60,6 +69,7 @@ public:
     void enable_cache(void);
     void trade_on_positive_swaps_only(bool flag) { trade_on_positive_swaps_only_ = flag; }
     void setup_hci(bool state) { if (decision_compensate_inverter_.use_count()) decision_compensate_inverter_enabled_ = state; }
+    const custom_handler_options &get_custom_handler_options(void) { return custom_handler_options_; }
 
 private:
 
@@ -82,6 +92,8 @@ private:
     files_change_tracker net_info_;
 
     bool trade_on_positive_swaps_only_;
+
+    custom_handler_options custom_handler_options_;
 };
 
 #endif /* __EXPERT_ADVISOR_HPP__ */
