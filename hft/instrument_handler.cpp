@@ -343,15 +343,31 @@ bool instrument_handler::should_prolong_position(void)
 
 void instrument_handler::trade_status(unsigned int current_price)
 {
-    if (state_ == handler_state::TRADE_LONG)
+    if (expert_advisor_.get_custom_handler_options().invert_engine_decision)
     {
-        hft_log(INFO) << "Trade status: "
-                      << ((current_price > trade_start_price_) ? "GAINS" : "LOSS");
+        if (state_ == handler_state::TRADE_LONG)
+        {
+            hft_log(INFO) << "Trade status: "
+                          << ((current_price > trade_start_price_) ? "LOSS" : "GAINS");
+        }
+        else if (state_ == handler_state::TRADE_SHORT)
+        {
+            hft_log(INFO) << "Trade status: "
+                          << ((current_price < trade_start_price_) ? "LOSS" : "GAINS");
+        }
     }
-    else if (state_ == handler_state::TRADE_SHORT)
+    else
     {
-        hft_log(INFO) << "Trade status: "
-                      << ((current_price < trade_start_price_) ? "GAINS" : "LOSS");
+        if (state_ == handler_state::TRADE_LONG)
+        {
+            hft_log(INFO) << "Trade status: "
+                          << ((current_price > trade_start_price_) ? "GAINS" : "LOSS");
+        }
+        else if (state_ == handler_state::TRADE_SHORT)
+        {
+            hft_log(INFO) << "Trade status: "
+                          << ((current_price < trade_start_price_) ? "GAINS" : "LOSS");
+        }
     }
 }
 
@@ -392,10 +408,24 @@ std::string instrument_handler::state2string(void) const
              /* No string label for WATCHING state */
              break;
         case handler_state::TRADE_LONG:
-             ret = "(LONG) ";
+             if (expert_advisor_.get_custom_handler_options().invert_engine_decision)
+             {
+                 ret = "(SHORT) ";
+             }
+             else
+             {
+                 ret = "(LONG) ";
+             }
              break;
         case handler_state::TRADE_SHORT:
-             ret = "(SHORT) ";
+             if (expert_advisor_.get_custom_handler_options().invert_engine_decision)
+             {
+                 ret = "(LONG) ";
+             }
+             else
+             {
+                 ret = "(SHORT) ";
+             }
              break;
     }
 
