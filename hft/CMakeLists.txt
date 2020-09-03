@@ -104,6 +104,7 @@ list(APPEND SOURCES
      ${PROJECT_SOURCE_DIR}/hftr_mixer_main.cpp
      ${PROJECT_SOURCE_DIR}/hft_bcalc_main.cpp
      ${PROJECT_SOURCE_DIR}/hci_tuner_main.cpp
+     ${PROJECT_SOURCE_DIR}/hft_dukascopy_optimizer_main.cpp
      ${PROJECT_SOURCE_DIR}/csv_loader.cpp
      ${PROJECT_SOURCE_DIR}/mdc.cpp
      ${PROJECT_SOURCE_DIR}/neuron.cpp

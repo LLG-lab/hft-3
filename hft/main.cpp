@@ -37,6 +37,7 @@ extern int hft_serial_analyzer_main(int argc, char *argv[]);
 extern int hft_server_main(int argc, char *argv[]);
 extern int hft_bcalc_main(int argc, char *argv[]);
 extern int hft_hci_tuner_main(int argc, char *argv[]);
+extern int hft_dukascopy_optimizer_main(int argc, char *argv[]);
 
 static struct
 {
@@ -53,7 +54,8 @@ static struct
     { .tool_name = "fxemulator",               .start_program = &hft_fxemulator_main },
     { .tool_name = "server",                   .start_program = &hft_server_main },
     { .tool_name = "bcalc",                    .start_program = &hft_bcalc_main },
-    { .tool_name = "hci-tuner",                .start_program = &hft_hci_tuner_main }
+    { .tool_name = "hci-tuner",                .start_program = &hft_hci_tuner_main },
+    { .tool_name = "dukascopy-optimizer",      .start_program = &hft_dukascopy_optimizer_main }
 };
 
 int main(int argc, char *argv[])
@@ -82,6 +84,7 @@ int main(int argc, char *argv[])
                       << "  instrument-distrib        obtain instrument variability distribution\n\n"
                       << "  distrib-approx-generator  generate binomial distribution approximation\n"
                       << "                            based on instrument variability distribution\n\n"
+                      << "  dukascopy-optimizer       Kelly criterion optimizer for Dukascopy\n\n"
                       << "  fxemulator                HFT TCP Client emulates Dukascopy forex trading\n"
                       << "                            platform using dukascopy historical CSV data\n\n"
                       << "  server                    HFT Trading TCP Server. Expert Advisor for\n"
