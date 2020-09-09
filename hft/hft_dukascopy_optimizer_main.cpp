@@ -89,7 +89,7 @@ static void load_trade_yield_data(trade_yield_container &ret)
     } while (eof);
 }
 
-static double overall_profit(const trade_yield_container &tyc, double alpha)
+static double overall_profit(const trade_yield_container &tyc, double alpha, bool optimize = false)
 {
     double k = hftOption(bankroll);
 
@@ -97,9 +97,10 @@ static double overall_profit(const trade_yield_container &tyc, double alpha)
     {
         k = k + y*alpha*k*hftOption(pip_value_1000) - 2.0*hftOption(value_commission_1000)*alpha*k;
 
-        if (k < 0.0)
+        if (! optimize && k < 0.0)
         {
             hft_log(ERROR) << "Bankruptcy";
+
             return k;
         }
     }
@@ -134,7 +135,7 @@ int hft_dukascopy_optimizer_main(int argc, char *argv[])
     // Parsing options for dukascopy optimizer.
     //
 
-    prog_opts::options_description desc("Options for dukascopy optimizer");
+    prog_opts::options_description desc("Options for Kelly criterion dukascopy optimizer");
     desc.add_options()
         ("help,h", "produce help message")
         ("trade-yield-file,f", prog_opts::value<std::string>(&hftOption(filename)), "File with white space delimited of Dukascoopy trade pips yield")
@@ -186,7 +187,28 @@ int hft_dukascopy_optimizer_main(int argc, char *argv[])
         // Optimization.
         //
 
-        hft_log(ERROR) << "FEATURE NOT IMPLEMENTED";
+        double best_yield = -10e7;
+        double best_alpha = 0.0;
+        double alpha;
+        double yield;
+
+        hft_log(INFO) << "Optimizing...";
+
+        for (int i = 1; i < 1000; i++)
+        {
+            alpha = static_cast<double>(i) / 100.0;
+
+            yield = overall_profit(trade_yields, alpha / 1000.0, true);
+
+            if (yield > best_yield)
+            {
+                best_yield = yield;
+                best_alpha = alpha;
+            }
+        }
+
+        hft_log(INFO) << "Bankroll after investition: " << overall_profit(trade_yields, best_alpha / 1000.0);
+        hft_log(INFO) << "Alpha function: " << best_alpha;
     }
 
     double s = 0;
