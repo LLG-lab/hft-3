@@ -99,18 +99,21 @@ public class Main {
         {
             config = load_configuration();
 
-            userName = config.getJSONObject("authorization").getString("username");
-            password = config.getJSONObject("authorization").getString("password");
-
             if (config.getString("mode").equals("live"))
             {
                 System.out.println("Starting with mode LIVE");
                 jnlpUrl = jnlpUrl_live;
+
+                userName = config.getJSONObject("authorization_live").getString("username");
+                password = config.getJSONObject("authorization_live").getString("password");
             }
             else if (config.getString("mode").equals("demo"))
             {
                 System.out.println("Starting with mode DEMO");
                 jnlpUrl = jnlpUrl_demo;
+
+                userName = config.getJSONObject("authorization").getString("username");
+                password = config.getJSONObject("authorization").getString("password");
             }
             else
             {
