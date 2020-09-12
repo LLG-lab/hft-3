@@ -18,6 +18,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <cmath>
+#include <thread>
 
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
@@ -41,14 +43,141 @@ static struct hft_hci_tuner_options_type
     int threshold_min;
     int threshold_max;
     bool json_out;
+    int ncores;
 
 } hft_hci_tuner_options;
+
+struct worker_data
+{
+    worker_data(int a, int b, const container &d)
+        : min(a), max(b), best_csize(0), best_tsf(10e10),
+          best_st(0.0), best_it(0.0), max_profit(-10e10),
+          data(d) {}
+
+    int min;
+    int max;
+
+    int    best_csize;
+    double best_tsf; // The smaller, the better.
+    double best_st;
+    double best_it;
+
+    double max_profit;
+    const container &data;
+
+    std::shared_ptr<std::thread> thread;
+};
+
+typedef std::vector<worker_data> workers;
+typedef void (*thread_function_type)(void *);
+
+//
+// Forward declarations.
+//
+
+static double get_overall_profit(const container &data, size_t hci_capacity,
+                                     double hci_st, double hci_it);
+
+static double get_tsf(const container &data, double a,
+                          size_t hci_capacity, double hci_st, double hci_it);
+
+
 
 #define hftOption(__X__) \
     hft_hci_tuner_options.__X__
 
 #define hft_log(__X__) \
     CLOG(__X__, "hci_tuner")
+
+static void thread_funct_best_profit(void *worker_data_info)
+{
+    worker_data *self = (worker_data *)(worker_data_info);
+
+    double profit;
+
+    for (unsigned int csize = self -> min; csize <= self -> max; csize++)
+    {
+        for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+        {
+            for (int it = st + 1; it < hftOption(threshold_max); it++)
+            {
+                profit = get_overall_profit(self -> data, csize, st, it);
+
+                if (profit > (self -> max_profit))
+                {
+                    self -> max_profit = profit;
+
+                    self -> best_csize = csize;
+                    self -> best_st = st;
+                    self -> best_it = it;
+                }
+            }
+        }
+    }
+}
+
+static void thread_funct_least_profit(void *worker_data_info)
+{
+    worker_data *self = (worker_data *)(worker_data_info);
+
+    double profit;
+    self -> max_profit *= -1.0; // Big positive number now.
+
+    for (unsigned int csize = self -> min; csize <= self -> max; csize++)
+    {
+        for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+        {
+            for (int it = st + 1; it < hftOption(threshold_max); it++)
+            {
+                profit = get_overall_profit(self -> data, csize, st, it);
+
+                if (profit < (self -> max_profit))
+                {
+                    self -> max_profit = profit;
+
+                    self -> best_csize = csize;
+                    self -> best_st = st;
+                    self -> best_it = it;
+                }
+            }
+        }
+    }
+}
+
+static void thread_funct_tsf(void *worker_data_info)
+{
+    worker_data *self = (worker_data *)(worker_data_info);
+
+    double tsf;
+    double a, profit;
+
+    for (unsigned int csize = self -> min; csize <= self -> max; csize++)
+    {
+        for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+        {
+            for (int it = st + 1; it < hftOption(threshold_max); it++)
+            {
+                profit = get_overall_profit(self -> data, csize, st, it);
+
+                if (profit > 0.0)
+                {
+                    a = profit / static_cast<double>(self -> data.size());
+                    tsf = get_tsf(self -> data, a, csize, st, it);
+
+                    if (tsf < (self -> best_tsf))
+                    {
+                        self -> max_profit = profit;
+                        self -> best_tsf = tsf;
+
+                        self -> best_csize = csize;
+                        self -> best_st = st;
+                        self -> best_it = it;
+                    }
+                }
+            }
+        }
+    }
+}
 
 static void load_data(container &data)
 {
@@ -274,6 +403,7 @@ int hft_hci_tuner_main(int argc, char *argv[])
         ("threshold-u-range,T", prog_opts::value<int>(&hftOption(threshold_max)) -> default_value(+100), "regulator threshold upper range")
         ("extremize,e", prog_opts::value<std::string>(&hftOption(extremize)) -> default_value("best-profit"), "Indicator to optimize; available are ‘best-profit’, ‘least-profit’, ‘tsf’")
         ("json-out,j", prog_opts::value<bool>(&hftOption(json_out)) -> default_value(false), "Output results in JSON format. Useful for parsing purposes by extermal program")
+        ("threads,u", prog_opts::value<int>(&hftOption(ncores)) -> default_value(std::thread::hardware_concurrency()), "Define number of threads")
     ;
 
     prog_opts::options_description cmdline_options;
@@ -314,95 +444,118 @@ int hft_hci_tuner_main(int argc, char *argv[])
     container data;
     load_data(data);
 
+    thread_function_type thread_function = nullptr;
+    int best_worker_result_index = 0;
+
     int    best_csize = 0;
     double best_st = 0.0;
     double best_it = 0.0;
 
     double max_profit = -10e10;
 
+    //
+    // Compute range for operations per each thread.
+    //
+
+    workers thread_workers;
+
+    double offset = static_cast<double>(hftOption(max_csize) - hftOption(min_csize)) / (hftOption(ncores) ? hftOption(ncores) : 1);
+    double upper_limit = static_cast<double>(hftOption(min_csize)) + offset > hftOption(max_csize) ? hftOption(max_csize) : static_cast<double>(hftOption(min_csize)) + offset;
+    worker_data r(hftOption(min_csize), static_cast<int>(upper_limit), data);
+    thread_workers.push_back(r);
+
+    while (upper_limit < hftOption(max_csize))
+    {
+        upper_limit += offset;
+
+        if (upper_limit > hftOption(max_csize))
+        {
+            upper_limit = hftOption(max_csize);
+        }
+
+        r.max = round(upper_limit);
+        r.min = thread_workers.at(thread_workers.size() - 1).max + 1;
+
+        if (r.max >= r.min)
+        {
+            thread_workers.push_back(r);
+        }
+    }
+
+    //
+    // Select thread routine.
+    //
+
+    if (hftOption(extremize) == "best-profit")
+    {
+        thread_function = thread_funct_best_profit;
+    }
+    else if (hftOption(extremize) == "least-profit")
+    {
+        thread_function = thread_funct_least_profit;
+    }
+    else if (hftOption(extremize) == "tsf")
+    {
+        thread_function = thread_funct_tsf;
+    }
+    else
+    {
+        hft_log(ERROR) << "Unrecognized indicator ‘"
+                       << hftOption(extremize) << "’";
+
+        return 1;
+    }
+
+    //
+    // Start threads and wait until complete.
+    //
+
+    for (auto &x : thread_workers)
+    {
+        x.thread.reset(new std::thread(thread_function, &x));
+    }
+
     if (! hftOption(json_out))
     {
         hft_log(INFO) << "Proceeding HCI tuning, patience...";
     }
 
+    for (auto &x : thread_workers)
+    {
+        x.thread -> join();
+    }
+
+    //
+    // Select thread that has the best result.
+    //
+
     if (hftOption(extremize) == "best-profit")
     {
-        double profit;
-
-        for (unsigned int csize = hftOption(min_csize); csize <= hftOption(max_csize); csize++)
+        for (int i = 0; i < thread_workers.size(); i++)
         {
-            for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+            if (thread_workers.at(i).max_profit > thread_workers.at(best_worker_result_index).max_profit)
             {
-                for (int it = st + 1; it < hftOption(threshold_max); it++)
-                {
-                    profit = get_overall_profit(data, csize, st, it);
-
-                    if (profit > max_profit)
-                    {
-                        max_profit = profit;
-
-                        best_csize = csize;
-                        best_st = st;
-                        best_it = it;
-                    }
-                }
+                best_worker_result_index = i;
             }
         }
     }
     else if (hftOption(extremize) == "least-profit")
     {
-        double profit;
-        max_profit *= -1.0; // Big positive number now.
-
-        for (unsigned int csize = hftOption(min_csize); csize <= hftOption(max_csize); csize++)
+        for (int i = 0; i < thread_workers.size(); i++)
         {
-            for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+            if (thread_workers.at(i).max_profit < thread_workers.at(best_worker_result_index).max_profit)
             {
-                for (int it = st + 1; it < hftOption(threshold_max); it++)
-                {
-                    profit = get_overall_profit(data, csize, st, it);
-
-                    if (profit < max_profit)
-                    {
-                        max_profit = profit;
-
-                        best_csize = csize;
-                        best_st = st;
-                        best_it = it;
-                    }
-                }
+                best_worker_result_index = i;
             }
         }
     }
     else if (hftOption(extremize) == "tsf")
     {
-        double tsf, best_tsf = 10e10;
-        double a, profit;
-
-        for (unsigned int csize = hftOption(min_csize); csize <= hftOption(max_csize); csize++)
+        for (int i = 0; i < thread_workers.size(); i++)
         {
-            for (int st = hftOption(threshold_min); st < hftOption(threshold_max) - 1; st++)
+            if (thread_workers.at(i).best_tsf < thread_workers.at(best_worker_result_index).best_tsf)
             {
-                for (int it = st + 1; it < hftOption(threshold_max); it++)
-                {
-                    profit = get_overall_profit(data, csize, st, it);
-
-                    if (profit > 0.0)
-                    {
-                        a = profit / static_cast<double>(data.size());
-                        tsf = get_tsf(data, a, csize, st, it);
-
-                        if (tsf < best_tsf)
-                        {
-                            max_profit = profit;
-                            best_tsf = tsf;
-
-                            best_csize = csize;
-                            best_st = st;
-                            best_it = it;
-                        }
-                    }
-                }
+                best_worker_result_index = i;
             }
         }
     }
@@ -413,6 +566,11 @@ int hft_hci_tuner_main(int argc, char *argv[])
 
         return 1;
     }
+
+    best_csize = thread_workers.at(best_worker_result_index).best_csize;
+    best_st    = thread_workers.at(best_worker_result_index).best_st;
+    best_it    = thread_workers.at(best_worker_result_index).best_it;
+    max_profit = thread_workers.at(best_worker_result_index).max_profit;
 
     if (hftOption(csv_file_name) != "none")
     {
