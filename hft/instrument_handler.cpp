@@ -101,7 +101,8 @@ void instrument_handler::on_tick(const hft::tick_message &message, std::ostrings
     if (ticks_counter_ % 50 == 0)
     {
         hft_log(INFO) << "Received 'tick' notify #" << ticks_counter_
-                      << " (ASK=" << message.ask << ")";
+                      << " (ASK=" << message.ask << "), equity: "
+                      << message.bankroll;
     }
 
     #endif /* INSTRUMENT_HANDLER_TICK_TRACE */
