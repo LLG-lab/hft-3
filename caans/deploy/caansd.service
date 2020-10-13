@@ -1,10 +1,10 @@
 [Unit]
-Description=The HFT Expert Advisor Server
+Description=The Central Alerting and Notification Service
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=simple
-ExecStart=/sbin/hft server
+ExecStart=/sbin/caans
 KillSignal=SIGINT
 
 [Install]

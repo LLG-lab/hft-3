@@ -1,0 +1,4 @@
+## General purposes cron file for HFT infrastructure purposes.
+## Copyright (c) 2017-2020 by LLG Ryszard Gradowski, All Rights Reserved.
+##
+* * * * *	root	/var/lib/hft/hftwatchdog-run.sh > /var/log/hft/hft-cron.log 2>&1 || true
