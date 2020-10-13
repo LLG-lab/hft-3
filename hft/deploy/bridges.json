@@ -1,0 +1,18 @@
+{
+    "bridges": [
+        {
+            "label"     : "dukascopy",
+            "active"    : false,
+            "program"   : "java",
+            "start_dir" : "\/var\/lib\/hft\/bridge\/dukascopy-bridge\/",
+            "argv"      : ["-cp", "hft-bridge-1.0.0.jar:*", "hft2ducascopy\/Main"]
+        },
+        {
+            "label"     : "bitmex",
+            "active"    : false,
+            "program"   : "php",
+            "start_dir" : "\/var\/lib\/hft\/bridge\/bitmex-bridge\/",
+            "argv"      : ["bitmex-bridge.php"]
+        }
+    ]
+}

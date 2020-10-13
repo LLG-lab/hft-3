@@ -4,6 +4,6 @@
     sharedscripts
     delaycompress
     postrotate
-        /bin/systemctl reload hftd.service > /dev/null 2>/dev/null || true
+        /bin/systemctl reload hft.service > /dev/null 2>/dev/null || true
     endscript
 }

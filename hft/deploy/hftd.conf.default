@@ -1,5 +1,5 @@
 [general]
-caans_integration_enabled=true
+caans_integration_enabled=false
 
 ## Server listen port.
 [networking]
@@ -7,23 +7,16 @@ listen_port=8137
 
 [handlers]
 enable_cache = 1
-prolong_position_to_next_setup = 0
+prolong_position_to_next_setup = 1
 
 [marketplace]
-enabled = true
-start_program = php
-arg1 = bitmex-bridge.php
-start_directory = /var/lib/hft/bridge/bitmex-bridge/
-#start_program = java
-#arg1 = -cp
-#arg2 = hft-bridge-1.0.0.jar:*
-#arg3 = hft2ducascopy/Main
-#start_directory = /var/lib/hft/bridge/dukascopy-bridge/
+enabled = false
+bridges_config = /etc/hft/bridges.json
 
 [trade_time_frame]
 enabled=false
-Mon = "07:30:00.000-23:59:59.999"
+Mon = "00:00:00.000-23:59:59.999"
 Tue = "00:00:00.000-23:59:59.999"
 Wed = "00:00:00.000-23:59:59.999"
 Thu = "00:00:00.000-23:59:59.999"
-Fri = "00:00:00.000-20:30:00.000"
+Fri = "00:00:00.000-20:59:00.000"
