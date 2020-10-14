@@ -38,7 +38,7 @@ project(hft)
 # The version number.
 #
 
-set(hft_VERSION_MAJOR 2)
+set(hft_VERSION_MAJOR 3)
 set(hft_VERSION_MINOR 0)
 
 #
