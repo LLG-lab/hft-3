@@ -21,7 +21,13 @@
 
 namespace hft {
 
-unsigned int floating2dpips(const std::string &data);
+typedef unsigned int instrument_type;
+
+const instrument_type UNRECOGNIZED_INSTRUMENT=0xFFFF;
+
+unsigned int floating2dpips(const std::string &data, instrument_type t);
+const char *get_instrument_description(instrument_type t);
+instrument_type instrument2type(const std::string &instrstr);
 
 std::string timestamp_to_datetime_str(long timestamp);
 

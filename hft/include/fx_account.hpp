@@ -22,6 +22,7 @@
 
 #include <custom_except.hpp>
 #include <csv_loader.hpp>
+#include <hft_utils.hpp>
 
 class fx_account
 {
@@ -29,8 +30,10 @@ public:
 
     DEFINE_CUSTOM_EXCEPTION_CLASS(exception, std::runtime_error)
 
-    fx_account(void)
-        : position_(NONE), open_price_(0.0),
+    fx_account(void) = delete;
+
+    fx_account(hft::instrument_type itype)
+        : itype_(itype), position_(NONE), open_price_(0.0),
           open_at_(""), invert_hft_decision_(false) {};
 
     void proceed_operation(const std::string &operation,
@@ -67,9 +70,9 @@ private:
               forcibly_closed(forcibly)
         {}
 
-        void display(void) const;
+        void display(hft::instrument_type itype) const;
 
-        double get_pips_pl(void) const;
+        double get_pips_pl(hft::instrument_type itype) const;
 
         position_type type;
         double open_price;
@@ -85,6 +88,8 @@ private:
     static const double leverage_;
 
     position_result_container position_history_;
+
+    const hft::instrument_type itype_;
 
     //
     // Position information.

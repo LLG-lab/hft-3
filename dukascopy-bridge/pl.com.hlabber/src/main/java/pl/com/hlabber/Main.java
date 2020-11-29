@@ -46,7 +46,7 @@ public class Main {
 
     private static int lightReconnects = 3;
 
-    private static String readFile(String path, Charset encoding) throws IOException 
+    private static String readFile(String path, Charset encoding) throws IOException
     {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
@@ -261,6 +261,84 @@ public class Main {
         {
             System.out.println("Subscribing USDCHF");
             instruments.add(Instrument.USDCHF);
+        }
+
+        if (config.has("USDJPY"))
+        {
+            System.out.println("Subscribing USDJPY");
+            instruments.add(Instrument.USDJPY);
+        }
+
+        if (config.has("USDCNH"))
+        {
+            System.out.println("Subscribing USDCNH");
+            instruments.add(Instrument.USDCNH);
+        }
+
+        if (config.has("USDDKK"))
+        {
+            System.out.println("Subscribing USDDKK");
+            instruments.add(Instrument.USDDKK);
+        }
+
+        if (config.has("USDHKD"))
+        {
+            System.out.println("Subscribing USDHKD");
+            instruments.add(Instrument.USDHKD);
+        }
+
+        if (config.has("USDHUF"))
+        {
+            System.out.println("Subscribing USDHUF");
+            instruments.add(Instrument.USDHUF);
+        }
+
+        if (config.has("USDMXN"))
+        {
+            System.out.println("Subscribing USDMXN");
+            instruments.add(Instrument.USDMXN);
+        }
+
+        if (config.has("USDNOK"))
+        {
+            System.out.println("Subscribing USDNOK");
+            instruments.add(Instrument.USDNOK);
+        }
+
+        if (config.has("USDPLN"))
+        {
+            System.out.println("Subscribing USDPLN");
+            instruments.add(Instrument.USDPLN);
+        }
+
+        if (config.has("USDRUB"))
+        {
+            System.out.println("Subscribing USDRUB");
+            instruments.add(Instrument.USDRUB);
+        }
+
+        if (config.has("USDSEK"))
+        {
+            System.out.println("Subscribing USDSEK");
+            instruments.add(Instrument.USDSEK);
+        }
+
+        if (config.has("USDSGD"))
+        {
+            System.out.println("Subscribing USDSGD");
+            instruments.add(Instrument.USDSGD);
+        }
+
+        if (config.has("USDTRY"))
+        {
+            System.out.println("Subscribing USDTRY");
+            instruments.add(Instrument.USDTRY);
+        }
+
+        if (config.has("USDZAR"))
+        {
+            System.out.println("Subscribing USDZAR");
+            instruments.add(Instrument.USDZAR);
         }
 
         System.out.println("Subscribing instruments to Dukascopy servers...");

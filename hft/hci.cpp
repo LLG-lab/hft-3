@@ -43,7 +43,8 @@ hci::hci(size_t capacity, double st, double it)
       index_(0),
       capacity_(capacity),
       buffer_(new int[capacity]),
-      integral_buffer_(new int[capacity])
+      integral_buffer_(new int[capacity]),
+      debug_(false)
 {
     el::Loggers::getLogger("HCI", true);
 
@@ -126,9 +127,13 @@ void hci::insert_pips_yield(int pips_yield)
     a = (s1 * capacity_ - s3 * s4) / (s2 * capacity_ - s3 * s3);
     b = (s4 - a * s3) / capacity_;
 
-    #ifdef HCI_TEST
-    std::cout << "y(x) = " << a << "*x + " << b << "\n";
-    #endif
+    if (debug_)
+    {
+        hft_log(DEBUG) << "(hci::insert_pips_yield) Got pips_yield ["
+                       << pips_yield << "], Function: y(x) = "
+                       << a << "*x + " << b << " HCI state ["
+                       << get_state_str();
+    }
 
     // 2. Update state if needed.
 

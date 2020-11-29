@@ -32,7 +32,7 @@ static tick_message parse_tick_message(token_iterator begin, token_iterator end)
 static historical_tick_message parse_historical_tick_message(token_iterator begin, token_iterator end);
 static hci_setup_message parse_hci_setup_message(token_iterator begin, token_iterator end);
 
-static void validate_instrument(const std::string &instrument);
+static hft::instrument_type validate_instrument(const std::string &instrument);
 static void validate_ask(const std::string &ask);
 
 //
@@ -163,7 +163,7 @@ tick_message parse_tick_message(token_iterator begin, token_iterator end)
     // Data validation for instrument.
     //
 
-    validate_instrument(instrument);
+    hft::instrument_type itype = validate_instrument(instrument);
 
     msg.instrument = instrument;
 
@@ -192,7 +192,7 @@ tick_message parse_tick_message(token_iterator begin, token_iterator end)
     // number to unsigned integer (value in pips).
     //
 
-    msg.ask = hft::floating2dpips(ask);
+    msg.ask = hft::floating2dpips(ask, itype);
 
     //
     // Data validation for bankroll. For bankroll we check
@@ -257,11 +257,11 @@ historical_tick_message parse_historical_tick_message(token_iterator begin, toke
     // Validation.
     //
 
-    validate_instrument(instrument);
+    hft::instrument_type itype = validate_instrument(instrument);
     validate_ask(ask);
 
     msg.instrument = instrument;
-    msg.ask = hft::floating2dpips(ask);
+    msg.ask = hft::floating2dpips(ask, itype);
 
     return msg;
 }
@@ -321,29 +321,38 @@ hci_setup_message parse_hci_setup_message(token_iterator begin, token_iterator e
     return msg;
 }
 
-void validate_instrument(const std::string &instrument)
+hft::instrument_type validate_instrument(const std::string &instrument)
 {
+    hft::instrument_type itype = hft::instrument2type(instrument);
+
+    if (itype == hft::UNRECOGNIZED_INSTRUMENT)
+    {
+        throw protocol_violation_error(std::string("Bad instrument: ‘") + instrument + std::string("’"));
+    }
+
+    return itype;
+
     //
     // Data validation for instrument. For instrument we
     // check if it has 6 capitalized letters.
     //
 
-    if (instrument.length() != 7)
-    {
-        throw protocol_violation_error(std::string("Bad instrument: ") + instrument);
-    }
-    else
-    {
-        for (auto strit = instrument.begin(); strit != instrument.end(); ++strit)
-        {
-            char c = (*strit);
-
-            if (c != '/' && (c < 'A' || c > 'Z'))
-            {
-                throw protocol_violation_error(std::string("Bad instrument: ") + instrument);
-            }
-        }
-    }
+//    if (instrument.length() != 7)
+//    {
+//        throw protocol_violation_error(std::string("Bad instrument: ") + instrument);
+//    }
+//    else
+//    {
+//        for (auto strit = instrument.begin(); strit != instrument.end(); ++strit)
+//        {
+//            char c = (*strit);
+//
+//            if (c != '/' && (c < 'A' || c > 'Z'))
+//            {
+//                throw protocol_violation_error(std::string("Bad instrument: ") + instrument);
+//            }
+//        }
+//    }
 }
 
 void validate_ask(const std::string &ask)

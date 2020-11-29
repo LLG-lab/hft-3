@@ -77,7 +77,7 @@ void expert_advisor::notify_close_position(int close_price)
             default:
                 throw exception("Attempt to notify close not opened position");
         }
-
+        //decision_compensate_inverter_ -> debug(true); //XXX Remove me.
         decision_compensate_inverter_ -> insert_pips_yield(yield_pips);
     }
 

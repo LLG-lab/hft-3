@@ -181,6 +181,15 @@ int hft_fxemulator_main(int argc, char *argv[])
 
     el::Logger *logger = el::Loggers::getLogger("fxemulator", true);
 
+    hft::instrument_type itype = hft::instrument2type(hftOption(instrument));
+
+    if (itype == hft::UNRECOGNIZED_INSTRUMENT)
+    {
+        hft_log(ERROR) << "Unsupported instrument ‘" << hftOption(instrument) << "’";
+
+        return 1;
+    }
+
     const std::vector<std::string> &files = vm["csv-files"].as<std::vector<std::string>>();
 
     boost::asio::io_context ioctx;
@@ -194,7 +203,7 @@ int hft_fxemulator_main(int argc, char *argv[])
         return 1;
     }
 
-    fx_account account;
+    fx_account account(itype);
 
     if (hftOption(invert_hft_decision))
     {

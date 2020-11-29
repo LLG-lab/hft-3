@@ -37,6 +37,10 @@ instrument_handler::instrument_handler(const boost::program_options::variables_m
 {
     el::Loggers::getLogger(logger_id_.c_str(), true);
 
+    hft_log(INFO) << "Initialize handler for instrument ‘"
+                  << hft::get_instrument_description(hft::instrument2type(instrument))
+                  << "’";
+
     if (config_["handlers.enable_cache"].as<bool>())
     {
         expert_advisor_.enable_cache();

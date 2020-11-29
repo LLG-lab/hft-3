@@ -35,6 +35,7 @@ static struct hft_serial_analyzer_options_type
 {
     std::string list_filename;
     std::string serial_filename;
+    std::string instrument;
     unsigned int pips_limit;
 } hft_serial_analyzer_options;
 
@@ -47,7 +48,7 @@ static struct hft_serial_analyzer_options_type
 static serial_container experiment_series;
 static unsigned int start_price = 0;
 
-static void proceed_file(const std::string &csv_file_name)
+static void proceed_file(const std::string &csv_file_name, hft::instrument_type itype)
 {
     csv_loader csv(csv_file_name);
     csv_loader::csv_record rec;
@@ -56,7 +57,7 @@ static void proceed_file(const std::string &csv_file_name)
 
     while (csv.get_record(rec))
     {
-        current_price = hft::floating2dpips(boost::lexical_cast<std::string>(rec.ask));
+        current_price = hft::floating2dpips(boost::lexical_cast<std::string>(rec.ask), itype);
 
         if (start_price == 0)
         {
@@ -191,6 +192,7 @@ int hft_serial_analyzer_main(int argc, char *argv[])
     prog_opts::options_description desc("Options for serial analyzer");
     desc.add_options()
         ("help,h", "produce help message")
+        ("instrument,i", prog_opts::value<std::string>(&hftOption(instrument)), "Instrument associated to CSV files")
         ("list-file,l", prog_opts::value<std::string>(&hftOption(list_filename)), "File with list of Dukascoopy historical CSV file names")
         ("serial-file,s", prog_opts::value<std::string>(&hftOption(serial_filename)), "File name with serial data, like \"00101011\"")
         ("pips-limit,p", prog_opts::value<unsigned int>(&hftOption(pips_limit)) -> default_value(0), "Pips limit")
@@ -225,6 +227,15 @@ int hft_serial_analyzer_main(int argc, char *argv[])
     // Validate options.
     //
 
+    hft::instrument_type itype = hft::instrument2type(hftOption(instrument));
+
+    if (itype == hft::UNRECOGNIZED_INSTRUMENT)
+    {
+        hft_log(ERROR) << "Unsupported instrument ‘" << hftOption(instrument) << "’";
+
+        return 1;
+    }
+
     if (hftOption(list_filename).length() == 0 && hftOption(serial_filename).length() == 0)
     {
         hft_log(ERROR) << "Unspecified csv files list file name or serial file name";
@@ -256,7 +267,7 @@ int hft_serial_analyzer_main(int argc, char *argv[])
 
             hft_log(INFO) << "Now processing [" << csv_file_name << "]";
 
-            proceed_file(csv_file_name);
+            proceed_file(csv_file_name, itype);
         }
     }
     else

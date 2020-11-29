@@ -74,7 +74,7 @@ void fx_account::proceed_operation(const std::string &operation,
         }
 
         auto last_position = position_history_.rbegin();
-        last_position -> display();
+        last_position -> display(itype_);
     }
     else
     {
@@ -103,7 +103,7 @@ void fx_account::forcibly_close_position(const csv_loader::csv_record &market_in
     }
 
     auto last_position = position_history_.rbegin();
-    last_position -> display();   
+    last_position -> display(itype_);
 }
 
 std::string fx_account::get_position_status(const csv_loader::csv_record &market_info) const
@@ -118,12 +118,12 @@ std::string fx_account::get_position_status(const csv_loader::csv_record &market
     {
         case LONG:
              current_price_str = boost::lexical_cast<std::string>(market_info.bid);
-             value = (double(hft::floating2dpips(current_price_str)) - double(hft::floating2dpips(open_price_str)))/10.0;
+             value = (double(hft::floating2dpips(current_price_str, itype_)) - double(hft::floating2dpips(open_price_str, itype_)))/10.0;
              ret = boost::lexical_cast<std::string>(value);
              break;
         case SHORT:
              current_price_str = boost::lexical_cast<std::string>(market_info.ask);
-             value = (double(hft::floating2dpips(open_price_str)) - double(hft::floating2dpips(current_price_str)))/10.0;
+             value = (double(hft::floating2dpips(open_price_str, itype_)) - double(hft::floating2dpips(current_price_str, itype_)))/10.0;
              ret = boost::lexical_cast<std::string>(value);
              break;
         default:
@@ -185,7 +185,7 @@ void fx_account::close_long(const csv_loader::csv_record &market_info, bool forc
 // Calculates profit/loss of position.
 //
 
-double fx_account::position_result::get_pips_pl(void) const
+double fx_account::position_result::get_pips_pl(hft::instrument_type itype) const
 {
     std::string open_price_str  = boost::lexical_cast<std::string>(open_price);
     std::string close_price_str = boost::lexical_cast<std::string>(close_price);
@@ -195,10 +195,10 @@ double fx_account::position_result::get_pips_pl(void) const
     switch (type)
     {
         case LONG:
-            value = (double(hft::floating2dpips(close_price_str)) - double(hft::floating2dpips(open_price_str)))/10.0;
+            value = (double(hft::floating2dpips(close_price_str, itype)) - double(hft::floating2dpips(open_price_str, itype)))/10.0;
             break;
         case SHORT:
-            value = (double(hft::floating2dpips(open_price_str)) - double(hft::floating2dpips(close_price_str)))/10.0;
+            value = (double(hft::floating2dpips(open_price_str, itype)) - double(hft::floating2dpips(close_price_str, itype)))/10.0;
             break;
         default:
             throw std::logic_error("Bad position type");
@@ -207,7 +207,7 @@ double fx_account::position_result::get_pips_pl(void) const
     return value;
 }
 
-void fx_account::position_result::display(void) const
+void fx_account::position_result::display(hft::instrument_type itype) const
 {
     switch (type)
     {
@@ -223,7 +223,7 @@ void fx_account::position_result::display(void) const
 
     bool tty_output = isatty(fileno(stdout));
 
-    double profit_loss = get_pips_pl();
+    double profit_loss = get_pips_pl(itype);
 
     if (profit_loss >= 0.0 && tty_output)
     {

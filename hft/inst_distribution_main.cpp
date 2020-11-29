@@ -48,6 +48,8 @@ static unsigned int total = 0;
 static struct hft_instrument_variability_distribution_config_type
 {
     std::string source;
+    std::string instrument;
+    hft::instrument_type itype;
     int granularity;
     std::string output_fmt;
     std::string output_file;
@@ -83,7 +85,7 @@ static void proceed_file(const std::string &csv_file_name, int granularity)
 
     while (csv_data.get_record(tick_record))
     {
-        dpips = hft::floating2dpips(boost::lexical_cast<std::string>(tick_record.ask));
+        dpips = hft::floating2dpips(boost::lexical_cast<std::string>(tick_record.ask), hftOption(itype));
 
         if (prev == 0)
         {
@@ -224,6 +226,7 @@ int hft_instrument_variability_distribution_main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("source,s", prog_opts::value<std::string>(&hftOption(source) ), "directory with ducascopy's .csv files or single .csv file name")
+        ("instrument,i", prog_opts::value<std::string>(&hftOption(instrument)), "Instrument associated to CSV file")
         ("granularity,g", prog_opts::value<int>(&hftOption(granularity)) -> default_value(1), "ticks distance, default value is 1")
         ("output-fmt,o", prog_opts::value<std::string>(&hftOption(output_fmt)) -> default_value("simple"), "Output distribution format. "
                                                                               "Available formats: „simple” or „json”. Default is „simple”")
@@ -248,6 +251,15 @@ int hft_instrument_variability_distribution_main(int argc, char *argv[])
         std::cout << desc << "\n";
 
         return 0;
+    }
+
+    hftOption(itype) = hft::instrument2type(hftOption(instrument));
+
+    if (hftOption(itype) == hft::UNRECOGNIZED_INSTRUMENT)
+    {
+        hft_log(ERROR) << "Unsupported instrument ‘" << hftOption(instrument) << "’";
+
+        return 1;
     }
 
     if (hftOption(output_fmt) != "simple" &&

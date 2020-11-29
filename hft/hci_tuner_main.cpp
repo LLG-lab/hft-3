@@ -42,6 +42,7 @@ static struct hft_hci_tuner_options_type
     unsigned int max_csize;
     int threshold_min;
     int threshold_max;
+    bool reversed_hci;
     bool json_out;
     int ncores;
 
@@ -88,6 +89,8 @@ static double get_tsf(const container &data, double a,
 
 #define hft_log(__X__) \
     CLOG(__X__, "hci_tuner")
+
+#define reversed_hci_coeff (hft_hci_tuner_options.reversed_hci ? -1.0 : 1.0)
 
 static void thread_funct_best_profit(void *worker_data_info)
 {
@@ -251,12 +254,12 @@ static double get_overall_profit(const container &data, size_t hci_capacity,
         }
         else
         {
-            pips_yield = (-1.0) * d;
+            pips_yield = -1.0 * d;
         }
 
         regulator.insert_pips_yield(pips_yield);
 
-        profit += pips_yield;
+        profit += reversed_hci_coeff * pips_yield;
     }
 
     return profit;
@@ -283,13 +286,13 @@ static double get_tsf(const container &data, double a,
         }
         else
         {
-            pips_yield = (-1.0) * d;
+            pips_yield = -1.0 * d;
         }
 
         regulator.insert_pips_yield(pips_yield);
 
         xi++;
-        yi += pips_yield;
+        yi += reversed_hci_coeff * pips_yield;
 
         if (yi - a*xi > b1)
         {
@@ -316,6 +319,7 @@ static std::string get_csv(const container &data, size_t hci_capacity,
     const decision_type network_virtual_decision = DECISION_LONG;
 
     hci regulator(hci_capacity, hci_st, hci_it);
+    //regulator.debug(true);
 
     for (auto d : data)
     {
@@ -325,12 +329,12 @@ static std::string get_csv(const container &data, size_t hci_capacity,
         }
         else
         {
-            pips_yield = (-1.0) * d;
+            pips_yield = -1.0 * d;
         }
 
         regulator.insert_pips_yield(pips_yield);
 
-        profit += pips_yield;
+        profit += reversed_hci_coeff * pips_yield;
         non_hci_profit += d;
 
         csv << (++n) << ';' << non_hci_profit << ';' << profit << "\n";
@@ -355,7 +359,7 @@ static std::string hci_state(const container &data, size_t hci_capacity,
         }
         else
         {
-            pips_yield = (-1.0) * d;
+            pips_yield = -1.0 * d;
         }
 
         regulator.insert_pips_yield(pips_yield);
@@ -402,6 +406,7 @@ int hft_hci_tuner_main(int argc, char *argv[])
         ("threshold-b-range,t", prog_opts::value<int>(&hftOption(threshold_min)) -> default_value(-100), "regulator threshold bottom range")
         ("threshold-u-range,T", prog_opts::value<int>(&hftOption(threshold_max)) -> default_value(+100), "regulator threshold upper range")
         ("extremize,e", prog_opts::value<std::string>(&hftOption(extremize)) -> default_value("best-profit"), "Indicator to optimize; available are ‘best-profit’, ‘least-profit’, ‘tsf’")
+        ("reversed-hci,r", prog_opts::value<bool>(&hftOption(reversed_hci)) -> default_value(false), "Use reversed decision from HCI regulator")
         ("json-out,j", prog_opts::value<bool>(&hftOption(json_out)) -> default_value(false), "Output results in JSON format. Useful for parsing purposes by extermal program")
         ("threads,u", prog_opts::value<int>(&hftOption(ncores)) -> default_value(std::thread::hardware_concurrency()), "Define number of threads")
     ;

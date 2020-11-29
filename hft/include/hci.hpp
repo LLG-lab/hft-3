@@ -37,6 +37,8 @@ public:
     void enable_cache(const std::string &file_name);
     std::string get_state_str(void) const;
 
+    void debug(bool state) { debug_ = state; }
+
 private:
 
     void load_object_state(void);
@@ -58,6 +60,8 @@ private:
     int *const integral_buffer_;
 
     std::string file_name_;
+
+    bool debug_;
 };
 
 #endif /* __HCI_HPP__ */

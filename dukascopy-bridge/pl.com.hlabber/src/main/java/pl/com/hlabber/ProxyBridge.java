@@ -82,6 +82,58 @@ public class ProxyBridge implements IStrategy
         {
             ret = "USDCHF";
         }
+        else if (instrument.equals(Instrument.USDJPY))
+        {
+            ret = "USDJPY";
+        }
+        else if (instrument.equals(Instrument.USDCNH))
+        {
+            ret = "USDCNH";
+        }
+        else if (instrument.equals(Instrument.USDDKK))
+        {
+            ret = "USDDKK";
+        }
+        else if (instrument.equals(Instrument.USDHKD))
+        {
+            ret = "USDHKD";
+        }
+        else if (instrument.equals(Instrument.USDHUF))
+        {
+            ret = "USDHUF";
+        }
+        else if (instrument.equals(Instrument.USDMXN))
+        {
+            ret = "USDMXN";
+        }
+        else if (instrument.equals(Instrument.USDNOK))
+        {
+            ret = "USDNOK";
+        }
+        else if (instrument.equals(Instrument.USDPLN))
+        {
+            ret = "USDPLN";
+        }
+        else if (instrument.equals(Instrument.USDRUB))
+        {
+            ret = "USDRUB";
+        }
+        else if (instrument.equals(Instrument.USDSEK))
+        {
+            ret = "USDSEK";
+        }
+        else if (instrument.equals(Instrument.USDSGD))
+        {
+            ret = "USDSGD";
+        }
+        else if (instrument.equals(Instrument.USDTRY))
+        {
+            ret = "USDTRY";
+        }
+        else if (instrument.equals(Instrument.USDZAR))
+        {
+            ret = "USDZAR";
+        }
 
         return ret;
     }
@@ -107,17 +159,16 @@ public class ProxyBridge implements IStrategy
         try
         {
             String instr = instrument2instrumentstr(instrument);
-//userName = config.getJSONObject("authorization").getString("username");
+
             String model = config.getJSONObject(instr).getJSONObject("investition_policy").getString("model");
 
             if (model.equals("const_units"))
             {
-                return (config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("amount")) / 1000.0;
+                return (config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("amount")) / 1000000.0;
             }
             else if (model.equals("equity_percentage"))
             {
-                double funct = config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("function");
-                double ret = (funct * this.account.getEquity()) / 1000000.0;
+                double funct = config.getJSONObject(instr).getJSONObject("investition_policy").getDouble("function");                double ret = (funct * this.account.getEquity()) / 1000000.0;
 
                 return ((ret < 0.001) ?  0.001 : ret);
             }
@@ -174,6 +225,58 @@ public class ProxyBridge implements IStrategy
                 if (config.has("USDCHF"))
                 {
                     instrument_enum_str += ";USD/CHF";
+                }
+                if (config.has("USDJPY"))
+                {
+                    instrument_enum_str += ";USD/JPY";
+                }
+                if (config.has("USDCNH"))
+                {
+                    instrument_enum_str += ";USD/CNH";
+                }
+                if (config.has("USDDKK"))
+                {
+                    instrument_enum_str += ";USD/DKK";
+                }
+                if (config.has("USDHKD"))
+                {
+                    instrument_enum_str += ";USD/HKD";
+                }
+                if (config.has("USDHUF"))
+                {
+                    instrument_enum_str += ";USD/HUF";
+                }
+                if (config.has("USDMXN"))
+                {
+                    instrument_enum_str += ";USD/MXN";
+                }
+                if (config.has("USDNOK"))
+                {
+                    instrument_enum_str += ";USD/NOK";
+                }
+                if (config.has("USDPLN"))
+                {
+                    instrument_enum_str += ";USD/PLN";
+                }
+                if (config.has("USDRUB"))
+                {
+                    instrument_enum_str += ";USD/RUB";
+                }
+                if (config.has("USDSEK"))
+                {
+                    instrument_enum_str += ";USD/SEK";
+                }
+                if (config.has("USDSGD"))
+                {
+                    instrument_enum_str += ";USD/SGD";
+                }
+                if (config.has("USDTRY"))
+                {
+                    instrument_enum_str += ";USD/TRY";
+                }
+                if (config.has("USDZAR"))
+                {
+                    instrument_enum_str += ";USD/ZAR";
                 }
 
                 outToServer.writeBytes("SUBSCRIBE"+instrument_enum_str+"\n");
@@ -255,12 +358,28 @@ public class ProxyBridge implements IStrategy
 
         if (isLong)
         {
-            slPrice = tick.getAsk() - this.getSlPips(instrument) * instrument.getPipValue();
+            if (this.getSlPips(instrument) == 0)
+            {
+                slPrice = 0;
+            }
+            else
+            {
+                slPrice = tick.getAsk() - this.getSlPips(instrument) * instrument.getPipValue();
+            }
+
             orderCmd = OrderCommand.BUY;
         }
         else
         {
-            slPrice = tick.getBid() + this.getSlPips(instrument) * instrument.getPipValue();
+            if (this.getSlPips(instrument) == 0)
+            {
+                slPrice = 0;
+            }
+            else
+            {
+                slPrice = tick.getBid() + this.getSlPips(instrument) * instrument.getPipValue();
+            }
+
             orderCmd = OrderCommand.SELL;
         }
 
@@ -283,13 +402,6 @@ public class ProxyBridge implements IStrategy
 
     public void onTick(Instrument instrument, ITick tick) throws JFException
     {
-        ///// Może niepotrzebne - na razie dla testu zostawiamy
-        //if (! instrument.equals(Instrument.EURUSD)) {
-        //    System.out.println("onAccount notify got called for instrument != EURUSD.");
-        //    return;
-        //}
-        ///// koniec testu. ////
-
         try
         {
             // Format bedzie taki:

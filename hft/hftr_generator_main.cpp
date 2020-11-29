@@ -29,6 +29,8 @@ static struct hftr_generator_options_type
     std::string csv_file_name;
     std::string hftr_file_name;
     std::string approximator_file;
+    std::string instrument;
+    hft::instrument_type itype;
     int offset;
     unsigned int granularity;
     double model_allowance_frac;
@@ -68,7 +70,7 @@ static hftr::output_type hftr_lookup_settelment(unsigned int ask, std::vector<cs
     {
         ++ticks_num;
 
-        int current_ask = hft::floating2dpips(boost::lexical_cast<std::string>(buffer.at(i).ask));
+        int current_ask = hft::floating2dpips(boost::lexical_cast<std::string>(buffer.at(i).ask), hftOption(itype));
 
         if (current_ask  >= ask + 10*hftOption(up_pips_limit))
         {
@@ -142,6 +144,7 @@ int hftr_generator_main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("input-file,i",  prog_opts::value<std::string>(&hftOption(csv_file_name) ), "input CSV file of Dukascopy .csv history data")
+        ("instrument,I", prog_opts::value<std::string>(&hftOption(instrument)), "Instrument associated to CSV file")
         ("output-file,o", prog_opts::value<std::string>(&hftOption(hftr_file_name)), "output HFTR (LLG-standarized HFT record) file. If file exists, data will be appended")
         ("approximator,a", prog_opts::value<std::string>(&hftOption(approximator_file)), "Binomial approximator of distribution")
         ("up-pips-limit,u", prog_opts::value<unsigned int>(&hftOption(up_pips_limit)) -> default_value(10), "Pips number of rise, after position is closed, default 10")
@@ -176,6 +179,15 @@ int hftr_generator_main(int argc, char *argv[])
     //
 
     el::Logger *logger = el::Loggers::getLogger("hftr_generator", true);
+
+    hftOption(itype) = hft::instrument2type(hftOption(instrument));
+
+    if (hftOption(itype) == hft::UNRECOGNIZED_INSTRUMENT)
+    {
+        hft_log(ERROR) << "Unsupported instrument ‘" << hftOption(instrument) << "’";
+
+        return 1;
+    }
 
     hft_log(INFO) << "Input file CSV: [" << hftOption(csv_file_name) << "]";
     hft_log(INFO) << "HFTR output file: [" << hftOption(hftr_file_name) << "]";
@@ -222,7 +234,7 @@ int hftr_generator_main(int argc, char *argv[])
 
     for (int i = 0; i < rec_buffer.size(); ++i)
     {
-        ask = hft::floating2dpips(boost::lexical_cast<std::string>(rec_buffer.at(i).ask));
+        ask = hft::floating2dpips(boost::lexical_cast<std::string>(rec_buffer.at(i).ask), hftOption(itype));
 
         if (ask == last_ask)
         {
