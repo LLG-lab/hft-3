@@ -230,7 +230,7 @@ public class ProxyBridge implements IStrategy
                 if (config.has("USDCAD"))
                 {
                     instrument_enum_str += ";USD/CAD";
-                    instruments.add(Instrument.USDUSD);
+                    instruments.add(Instrument.USDCAD);
                 }
                 if (config.has("USDCHF"))
                 {
