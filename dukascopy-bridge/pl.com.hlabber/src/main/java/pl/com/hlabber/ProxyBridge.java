@@ -41,6 +41,9 @@ public class ProxyBridge implements IStrategy
 
     private JSONObject config;
 
+    private Set<Instrument> instruments;
+    private int chkSubscribeCounter;
+
     //
     // External configurable parameters.
     //
@@ -191,6 +194,8 @@ public class ProxyBridge implements IStrategy
         config = cfg;
         connectionPort = hft_listening_port;
         int connect_attempt = 0;
+        this.instruments = new HashSet<>();
+        this.chkSubscribeCounter = 0;
 
         while (true)
         {
@@ -205,78 +210,97 @@ public class ProxyBridge implements IStrategy
                 if (config.has("AUDUSD"))
                 {
                     instrument_enum_str += ";AUD/USD";
+                    instruments.add(Instrument.AUDUSD);
                 }
                 if (config.has("EURUSD"))
                 {
                     instrument_enum_str += ";EUR/USD";
+                    instruments.add(Instrument.EURUSD);
                 }
                 if (config.has("GBPUSD"))
                 {
                     instrument_enum_str += ";GBP/USD";
+                    instruments.add(Instrument.GBPUSD);
                 }
                 if (config.has("NZDUSD"))
                 {
                     instrument_enum_str += ";NZD/USD";
+                    instruments.add(Instrument.NZDUSD);
                 }
                 if (config.has("USDCAD"))
                 {
                     instrument_enum_str += ";USD/CAD";
+                    instruments.add(Instrument.USDUSD);
                 }
                 if (config.has("USDCHF"))
                 {
                     instrument_enum_str += ";USD/CHF";
+                    instruments.add(Instrument.USDCHF);
                 }
                 if (config.has("USDJPY"))
                 {
                     instrument_enum_str += ";USD/JPY";
+                    instruments.add(Instrument.USDJPY);
                 }
                 if (config.has("USDCNH"))
                 {
                     instrument_enum_str += ";USD/CNH";
+                    instruments.add(Instrument.USDCNH);
                 }
                 if (config.has("USDDKK"))
                 {
                     instrument_enum_str += ";USD/DKK";
+                    instruments.add(Instrument.USDDKK);
                 }
                 if (config.has("USDHKD"))
                 {
                     instrument_enum_str += ";USD/HKD";
+                    instruments.add(Instrument.USDHKD);
                 }
                 if (config.has("USDHUF"))
                 {
                     instrument_enum_str += ";USD/HUF";
+                    instruments.add(Instrument.USDHUF);
                 }
                 if (config.has("USDMXN"))
                 {
                     instrument_enum_str += ";USD/MXN";
+                    instruments.add(Instrument.USDMXN);
                 }
                 if (config.has("USDNOK"))
                 {
                     instrument_enum_str += ";USD/NOK";
+                    instruments.add(Instrument.USDNOK);
                 }
                 if (config.has("USDPLN"))
                 {
                     instrument_enum_str += ";USD/PLN";
+                    instruments.add(Instrument.USDPLN);
                 }
                 if (config.has("USDRUB"))
                 {
                     instrument_enum_str += ";USD/RUB";
+                    instruments.add(Instrument.USDRUB);
                 }
                 if (config.has("USDSEK"))
                 {
                     instrument_enum_str += ";USD/SEK";
+                    instruments.add(Instrument.USDSEK);
                 }
                 if (config.has("USDSGD"))
                 {
                     instrument_enum_str += ";USD/SGD";
+                    instruments.add(Instrument.USDSGD);
                 }
                 if (config.has("USDTRY"))
                 {
                     instrument_enum_str += ";USD/TRY";
+                    instruments.add(Instrument.USDTRY);
                 }
                 if (config.has("USDZAR"))
                 {
                     instrument_enum_str += ";USD/ZAR";
+                    instruments.add(Instrument.USDZAR);
                 }
 
                 outToServer.writeBytes("SUBSCRIBE"+instrument_enum_str+"\n");
@@ -309,6 +333,20 @@ public class ProxyBridge implements IStrategy
                 System.err.println(e.getMessage());
             }
         }
+    }
+
+    private void checkDukascopySubscribed()
+    {
+        if (! this.context.getSubscribedInstruments().containsAll(this.instruments)
+               && this.chkSubscribeCounter <= 0)
+        {
+            System.out.println("WARNING! Some instruments still unsubscribed");
+
+            this.context.setSubscribedInstruments(this.instruments);
+            this.chkSubscribeCounter = 50;
+        }
+
+        this.chkSubscribeCounter--;
     }
 
     private void closeOrders(List<IOrder> orders) throws JFException
@@ -404,6 +442,8 @@ public class ProxyBridge implements IStrategy
     {
         try
         {
+            this.checkDukascopySubscribed();
+
             // Format bedzie taki:
             // instrument;ASK;ile_siana;pozycja
             // account.getCreditLine(), account.getBalance()
