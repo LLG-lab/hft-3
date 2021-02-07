@@ -1,9 +1,10 @@
 #!/bin/bash -e
 
-###########################################
-#  Easy project configuration utility     #
-# Copyright (c) 2016 Hlabber corporation  #
-###########################################
+####################################################
+#  Easy project configuration utility              #
+#  Copyright (c) 2017 - 2021 LLG Ryszard Gradowski #
+#  All Rights Reserved                             #
+####################################################
 
 function show_help()
 {

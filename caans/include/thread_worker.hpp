@@ -2,7 +2,7 @@
 **                                                                    **
 **       -=≡≣ Central Alerting And Notification Service  ≣≡=-        **
 **                                                                    **
-**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2021 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **

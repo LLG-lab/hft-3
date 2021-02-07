@@ -2,7 +2,7 @@
 **                                                                    **
 **                 -=≡≣ BitMex Data Manager  ≣≡=-                    **
 **                                                                    **
-**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2021 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **
@@ -66,7 +66,7 @@ std::string db_file_name = getenv("HOME") + std::string("/bdm.db");
 int main(int argc, char *argv[])
 {
     std::cout << "Bitmex Data Manager®, version " << BDM_VERSION_MAJOR << '.' << BDM_VERSION_MINOR << std::endl
-              << " 2017 - 2020 by LLG Ryszard Gradowski, All Rights Reserved" << std::endl << std::endl;
+              << " 2017 - 2021 by LLG Ryszard Gradowski, All Rights Reserved" << std::endl << std::endl;
 
     if (argc > 1)
     {

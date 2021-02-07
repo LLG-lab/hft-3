@@ -2,7 +2,7 @@
 **                                                                    **
 **             -=≡≣ High Frequency Trading System  ≣≡=-              **
 **                                                                    **
-**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2021 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     try
     {
         std::cout << "High Frequency Trading System - Professional Expert Advisor\n";
-        std::cout << " Copyright   2017 - 2020 by LLG Ryszard Gradowski, All Rights Reserved.\n\n";
+        std::cout << " Copyright   2017 - 2021 by LLG Ryszard Gradowski, All Rights Reserved.\n\n";
 
         if (argc == 1 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
         {

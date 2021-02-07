@@ -3,7 +3,7 @@
 declare -r ARG="$1"
 
 if [ "x$ARG" = "x" ] ; then
-    echo "Hft Watchdog - Copyright (c) 2017-2020 by LLG Ryszard Gradowski, All Rights Reserved"
+    echo "Hft Watchdog - Copyright (c) 2017-2021 by LLG Ryszard Gradowski, All Rights Reserved"
     echo ""
     echo "Usage:"
     echo "  hft-watchdog enable|disable|status"

@@ -49,7 +49,7 @@ INSPECT=no
 if [ "x$TARGET" = "x" ] || [ "x$TARGET" = "x--help" ] || [ "x$TARGET" = "x-h" ] ; then
     echo ""
     echo "RPM-GEN - Centos 7 distribution RPM packages generator for HFT"
-    echo "Copytight (c) 2017 - 2020 by LLG Ryszard Gradowski, All Rights Reserved"
+    echo "Copytight (c) 2017 - 2021 by LLG Ryszard Gradowski, All Rights Reserved"
     echo
     echo "Usage:"
     echo "   $(basename $0) <target>|inspect"

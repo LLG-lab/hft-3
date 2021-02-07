@@ -2,7 +2,7 @@
 **                                                                    **
 **       -=≡≣ Central Alerting And Notification Service  ≣≡=-        **
 **                                                                    **
-**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2021 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     {
         std::cout << "Central Alerting And Notification Service , version "
                   << CAANS_VERSION_MAJOR << '.' << CAANS_VERSION_MINOR << std::endl
-                  << "Copyright  2017 - 2020 by LLG Ryszard Gradowski, All Rights Reserved\n\n";
+                  << "Copyright  2017 - 2021 by LLG Ryszard Gradowski, All Rights Reserved\n\n";
 
         //
         // Handle simple program options.

@@ -4,7 +4,7 @@
 **                                                                    **
 **             -=≡≣ High Frequency Trading System  ≣≡=-              **
 **                                                                    **
-**          Copyright  2017 - 2020 by LLG Ryszard Gradowski          **
+**          Copyright  2017 - 2021 by LLG Ryszard Gradowski          **
 **                       All Rights Reserved.                         **
 **                                                                    **
 **  CAUTION! This application is an intellectual propery              **
@@ -34,7 +34,7 @@ function exit_error(message, rc = 1) {
 function show_usage() {
     console.log('');
     console.log(path.basename(process.argv[1]) + ' – Instrument manifest JSON data manipulation utility');
-    console.log('Copyright  2017 - 2020 by LLG Ryszard Gradowski, All Rights Reserved.');
+    console.log('Copyright  2017 - 2021 by LLG Ryszard Gradowski, All Rights Reserved.');
     console.log('');
     console.log('Usage:');
     console.log('  ' + path.basename(process.argv[1])+' <instrument> option[=value] [option[=value] ...]');
@@ -82,6 +82,9 @@ function should_help(a) {
 }
 
 function validate_instrument(instr) {
+/*
+FIXME: Add new validation for comodities, indicies, etc.
+
     const alpha = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
                     'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
                     'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0',
@@ -96,7 +99,7 @@ function validate_instrument(instr) {
             exit_error('Bad financial instrument: ‘' + instr + '’');
         }
     }
-
+*/
     return instr;
 }
 
