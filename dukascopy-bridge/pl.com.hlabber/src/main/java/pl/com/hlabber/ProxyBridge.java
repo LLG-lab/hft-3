@@ -43,6 +43,7 @@ public class ProxyBridge implements IStrategy
 
     private Set<Instrument> instruments;
     private int chkSubscribeCounter;
+    private int orderCounter;
 
     //
     // External configurable parameters.
@@ -137,6 +138,34 @@ public class ProxyBridge implements IStrategy
         {
             ret = "USDZAR";
         }
+        else if (instrument.equals(Instrument.fromString("USA500.IDX/USD")))
+        {
+            ret = "USA500.IDXUSD";
+        }
+        else if (instrument.equals(Instrument.fromString("EUS.IDX/EUR")))
+        {
+            ret = "EUS.IDXEUR";
+        }
+        else if (instrument.equals(Instrument.fromString("BRENT.CMD/USD")))
+        {
+            ret = "BRENT.CMDUSD";
+        }
+        else if (instrument.equals(Instrument.fromString("LIGHT.CMD/USD")))
+        {
+            ret = "LIGHT.CMDUSD";
+        }
+        else if (instrument.equals(Instrument.fromString("COPPER.CMD/USD")))
+        {
+            ret = "COPPER.CMDUSD";
+        }
+        else if (instrument.equals(Instrument.fromString("XAU/USD")))
+        {
+            ret = "XAUUSD";
+        }
+        else if (instrument.equals(Instrument.fromString("XAG/USD")))
+        {
+            ret = "XAGUSD";
+        }
 
         return ret;
     }
@@ -196,6 +225,7 @@ public class ProxyBridge implements IStrategy
         int connect_attempt = 0;
         this.instruments = new HashSet<>();
         this.chkSubscribeCounter = 0;
+        this.orderCounter = 0;
 
         while (true)
         {
@@ -302,6 +332,41 @@ public class ProxyBridge implements IStrategy
                     instrument_enum_str += ";USD/ZAR";
                     instruments.add(Instrument.USDZAR);
                 }
+                if (config.has("USA500.IDXUSD"))
+                {
+                    instrument_enum_str += ";USA500.IDX/USD";
+                    instruments.add(Instrument.fromString("USA500.IDX/USD"));
+                }
+                if (config.has("EUS.IDXEUR"))
+                {
+                    instrument_enum_str += ";EUS.IDX/EUR";
+                    instruments.add(Instrument.fromString("EUS.IDX/EUR"));
+                }
+                if (config.has("BRENT.CMDUSD"))
+                {
+                    instrument_enum_str += ";BRENT.CMD/USD";
+                    instruments.add(Instrument.fromString("BRENT.CMD/USD"));
+                }
+                if (config.has("LIGHT.CMDUSD"))
+                {
+                    instrument_enum_str += ";LIGHT.CMD/USD";
+                    instruments.add(Instrument.fromString("LIGHT.CMD/USD"));
+                }
+                if (config.has("COPPER.CMDUSD"))
+                {
+                    instrument_enum_str += ";COPPER.CMD/USD";
+                    instruments.add(Instrument.fromString("COPPER.CMD/USD"));
+                }
+                if (config.has("XAUUSD"))
+                {
+                    instrument_enum_str += ";XAU/USD";
+                    instruments.add(Instrument.fromString("XAU/USD"));
+                }
+                if (config.has("XAGUSD"))
+                {
+                    instrument_enum_str += ";XAG/USD";
+                    instruments.add(Instrument.fromString("XAG/USD"));
+                }
 
                 outToServer.writeBytes("SUBSCRIBE"+instrument_enum_str+"\n");
                 String reply = inFromServer.readLine();
@@ -389,35 +454,16 @@ public class ProxyBridge implements IStrategy
         }
     }
 
-    private void submitOrder(Instrument instrument, ITick tick, boolean isLong) throws JFException
+    private void submitOrder(Instrument instrument, boolean isLong) throws JFException
     {
-        double slPrice;
         OrderCommand orderCmd;
 
         if (isLong)
         {
-            if (this.getSlPips(instrument) == 0)
-            {
-                slPrice = 0;
-            }
-            else
-            {
-                slPrice = tick.getAsk() - this.getSlPips(instrument) * instrument.getPipValue();
-            }
-
             orderCmd = OrderCommand.BUY;
         }
         else
         {
-            if (this.getSlPips(instrument) == 0)
-            {
-                slPrice = 0;
-            }
-            else
-            {
-                slPrice = tick.getBid() + this.getSlPips(instrument) * instrument.getPipValue();
-            }
-
             orderCmd = OrderCommand.SELL;
         }
 
@@ -434,8 +480,10 @@ public class ProxyBridge implements IStrategy
             }
         }
 
-        engine.submitOrder("hft_" + orderCmd.toString() + System.currentTimeMillis(),
-                               instrument, orderCmd, this.getAmount(instrument), 0, 2, slPrice, 0);
+        this.orderCounter++;
+
+        engine.submitOrder("hft_" + this.orderCounter + orderCmd.toString() + System.currentTimeMillis(),
+                               instrument, orderCmd, this.getAmount(instrument));
     }
 
     public void onTick(Instrument instrument, ITick tick) throws JFException
@@ -463,9 +511,9 @@ public class ProxyBridge implements IStrategy
                     }
                 }
             } else if (reply.equals("LONG")) {
-                submitOrder(instrument, tick, true);
+                submitOrder(instrument, true);
             } else if (reply.equals("SHORT")) {
-                submitOrder(instrument, tick, false);
+                submitOrder(instrument, false);
             } else {
                 System.err.println("Received unrecognized operation from HFT server: ["+reply+']');
             }
@@ -484,7 +532,27 @@ public class ProxyBridge implements IStrategy
 
     public void onMessage(IMessage message) throws JFException
     {
-        /* Nothing to do */
+        switch (message.getType())
+        {
+            case ORDER_CLOSE_REJECTED:
+            {
+                /* Close retry. */
+
+                message.getOrder().close();
+                break;
+            }
+            case ORDER_FILL_REJECTED:
+            {
+                /* Re-create order. */
+
+                Instrument instrument = message.getOrder().getInstrument();
+                boolean isLong = (message.getOrder().isLong());
+
+                submitOrder(instrument, isLong);
+
+                break;
+            }
+        }
     }
 
     public void onAccount(IAccount acc) throws JFException

@@ -341,6 +341,48 @@ public class Main {
             instruments.add(Instrument.USDZAR);
         }
 
+        if (config.has("USA500.IDXUSD"))
+        {
+            System.out.println("Subscribing USA500.IDXUSD");
+            instruments.add(Instrument.fromString("USA500.IDX/USD"));
+        }
+
+        if (config.has("EUS.IDXEUR"))
+        {
+            System.out.println("Subscribing EUS.IDXEUR");
+            instruments.add(Instrument.fromString("EUS.IDX/EUR"));
+        }
+
+        if (config.has("BRENT.CMDUSD"))
+        {
+            System.out.println("Subscribing BRENT.CMDUSD");
+            instruments.add(Instrument.fromString("BRENT.CMD/USD"));
+        }
+
+        if (config.has("LIGHT.CMDUSD"))
+        {
+            System.out.println("Subscribing LIGHT.CMDUSD");
+            instruments.add(Instrument.fromString("LIGHT.CMD/USD"));
+        }
+
+        if (config.has("COPPER.CMDUSD"))
+        {
+            System.out.println("Subscribing COPPER.CMDUSD");
+            instruments.add(Instrument.fromString("COPPER.CMD/USD"));
+        }
+
+        if (config.has("XAUUSD"))
+        {
+            System.out.println("Subscribing XAUUSD");
+            instruments.add(Instrument.fromString("XAU/USD"));
+        }
+
+        if (config.has("XAGUSD"))
+        {
+            System.out.println("Subscribing XAGUSD");
+            instruments.add(Instrument.fromString("XAG/USD"));
+        }
+
         System.out.println("Subscribing instruments to Dukascopy servers...");
         client.setSubscribedInstruments(instruments);
     }
